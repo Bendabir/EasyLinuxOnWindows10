@@ -34,13 +34,19 @@ Append the following content to the file. Modify the path to `Xming.exe` with th
 ```bash
 # Running Xming server 
 # Redirecting error messages to nowhere, just a fucking windows error
-/mnt/c/Program\ Files\ \(x86\)/Xming/Xming.exe :0 -clipboard -multiwindow -unixkill -winkill 2> /dev/null &
+if ! pgrep Xming > /dev/null
+        then
+                /mnt/c/Program\ Files\ \(x86\)/Xming/Xming.exe :0 -clipboard -multiwindow -unixkill -winkill > /dev/null 2>&1 &
+fi
 
 # Connecting to Xming
 export DISPLAY=localhost:0.0
 
-# Closing Xming when exiting bash
-trap 'cmd.exe /C TASKKILL /F /IM Xming.exe' EXIT SIGKILL > /dev/null
+# Trapping only for first running bash
+if [ "$BASHPID" -eq "2" ]
+        then
+                trap 'cmd.exe /C TASKKILL /F /IM Xming.exe' EXIT SIGKILL > /dev/null 2>&1
+fi
 ```
 
 Save the file and restart Bash. You can notice that Xming starts automagically. When executing the `exit` command, it will kill both Bash and Xming.
